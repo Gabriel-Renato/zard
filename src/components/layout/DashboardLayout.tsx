@@ -3,7 +3,6 @@ import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { 
-  Zap, 
   LayoutDashboard, 
   BookOpen, 
   Layers,
@@ -14,6 +13,7 @@ import {
   X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -50,9 +50,7 @@ const DashboardLayout = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <Link to="/" className="flex items-center gap-2 mb-10">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Zap className="w-6 h-6 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="Zard" className="w-10 h-10 rounded-xl" />
           <span className="text-xl font-bold">Zard</span>
         </Link>
 

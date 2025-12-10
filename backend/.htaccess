@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /zard-flashcard-mastery/backend/
+
+# Redirecionar para API
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
+
+# Permitir acesso direto a arquivos PHP
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+

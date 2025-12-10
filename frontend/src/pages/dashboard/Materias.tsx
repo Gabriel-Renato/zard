@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
   MoreVertical
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiService from "@/services/api";
 
 const colorOptions = [
   "#0D9488", "#F59E0B", "#EC4899", "#8B5CF6", 
@@ -30,67 +31,94 @@ const colorOptions = [
 
 interface Subject {
   id: number;
-  name: string;
-  color: string;
-  description: string;
-  topics: number;
-  flashcards: number;
+  nome: string;
+  cor: string;
+  descricao: string;
+  flashcards_count?: number;
+  flashcards_revisados?: number;
 }
 
-const initialSubjects: Subject[] = [
-  { id: 1, name: "Direito Constitucional", color: "#0D9488", description: "Princípios e normas da Constituição", topics: 8, flashcards: 45 },
-  { id: 2, name: "Português", color: "#F59E0B", description: "Gramática e interpretação de texto", topics: 12, flashcards: 32 },
-  { id: 3, name: "Raciocínio Lógico", color: "#EC4899", description: "Lógica proposicional e matemática", topics: 6, flashcards: 28 },
-  { id: 4, name: "Direito Administrativo", color: "#8B5CF6", description: "Princípios da administração pública", topics: 10, flashcards: 38 },
-];
-
 const Materias = () => {
-  const [subjects, setSubjects] = useState<Subject[]>(initialSubjects);
+  const userId = parseInt(localStorage.getItem('userId') || '0');
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [newSubject, setNewSubject] = useState({ name: "", color: colorOptions[0], description: "" });
   const { toast } = useToast();
 
-  const handleSave = () => {
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  const loadSubjects = async () => {
+    if (!userId) return;
+    setIsLoading(true);
+    try {
+      const response = await apiService.listarMaterias(userId);
+      if (response.success && response.data) {
+        setSubjects(response.data);
+      }
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao carregar matérias", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
     if (!newSubject.name.trim()) {
       toast({ title: "Erro", description: "Nome da matéria é obrigatório", variant: "destructive" });
       return;
     }
 
-    if (editingSubject) {
-      setSubjects(subjects.map(s => 
-        s.id === editingSubject.id 
-          ? { ...s, name: newSubject.name, color: newSubject.color, description: newSubject.description }
-          : s
-      ));
-      toast({ title: "Matéria atualizada!", description: `${newSubject.name} foi atualizada com sucesso.` });
-    } else {
-      const newId = Math.max(...subjects.map(s => s.id)) + 1;
-      setSubjects([...subjects, { 
-        id: newId, 
-        name: newSubject.name, 
-        color: newSubject.color, 
-        description: newSubject.description,
-        topics: 0,
-        flashcards: 0
-      }]);
-      toast({ title: "Matéria criada!", description: `${newSubject.name} foi adicionada com sucesso.` });
+    try {
+      if (editingSubject) {
+        await apiService.atualizarMateria(userId, editingSubject.id, {
+          nome: newSubject.name,
+          descricao: newSubject.description,
+          cor: newSubject.color
+        });
+        toast({ title: "Matéria atualizada!", description: `${newSubject.name} foi atualizada com sucesso.` });
+      } else {
+        await apiService.criarMateria(userId, newSubject.name, newSubject.description, newSubject.color);
+        toast({ title: "Matéria criada!", description: `${newSubject.name} foi adicionada com sucesso.` });
+      }
+      await loadSubjects();
+      setIsDialogOpen(false);
+      setEditingSubject(null);
+      setNewSubject({ name: "", color: colorOptions[0], description: "" });
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao salvar matéria", 
+        variant: "destructive" 
+      });
     }
-
-    setIsDialogOpen(false);
-    setEditingSubject(null);
-    setNewSubject({ name: "", color: colorOptions[0], description: "" });
   };
 
   const handleEdit = (subject: Subject) => {
     setEditingSubject(subject);
-    setNewSubject({ name: subject.name, color: subject.color, description: subject.description });
+    setNewSubject({ name: subject.nome, color: subject.cor, description: subject.descricao || "" });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setSubjects(subjects.filter(s => s.id !== id));
-    toast({ title: "Matéria removida", description: "A matéria foi excluída com sucesso." });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiService.deletarMateria(userId, id);
+      toast({ title: "Matéria removida", description: "A matéria foi excluída com sucesso." });
+      await loadSubjects();
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao remover matéria", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const openNewDialog = () => {
@@ -165,9 +193,12 @@ const Materias = () => {
       </div>
 
       {/* Subjects Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence>
-          {subjects.map((subject, i) => (
+      {isLoading ? (
+        <div className="text-center py-10 text-muted-foreground">Carregando...</div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
+            {subjects.map((subject, i) => (
             <motion.div
               key={subject.id}
               initial={{ opacity: 0, y: 20 }}
@@ -177,33 +208,35 @@ const Materias = () => {
             >
               <Card className="group hover:shadow-card-hover transition-all overflow-hidden">
                 {/* Color Bar */}
-                <div className="h-2" style={{ backgroundColor: subject.color }} />
+                <div className="h-2" style={{ backgroundColor: subject.cor }} />
                 
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div 
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: `${subject.color}20` }}
+                        style={{ backgroundColor: `${subject.cor}20` }}
                       >
-                        <BookOpen className="w-6 h-6" style={{ color: subject.color }} />
+                        <BookOpen className="w-6 h-6" style={{ color: subject.cor }} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg">{subject.name}</h3>
-                        <p className="text-sm text-muted-foreground">{subject.description}</p>
+                        <h3 className="font-bold text-lg">{subject.nome}</h3>
+                        <p className="text-sm text-muted-foreground">{subject.descricao || ''}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex gap-4 mb-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Layers className="w-4 h-4" />
-                      {subject.topics} assuntos
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <CreditCard className="w-4 h-4" />
-                      {subject.flashcards} flashcards
+                      {subject.flashcards_count || 0} flashcards
                     </div>
+                    {subject.flashcards_revisados !== undefined && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Layers className="w-4 h-4" />
+                        {subject.flashcards_revisados} revisados
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2">
@@ -223,9 +256,10 @@ const Materias = () => {
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

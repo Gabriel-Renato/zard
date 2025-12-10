@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,23 +30,22 @@ import {
   BookOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiService from "@/services/api";
 
 interface Flashcard {
   id: number;
-  question: string;
-  answer: string;
-  subject: string;
-  difficulty: "easy" | "medium" | "hard";
-  reviewed: boolean;
+  pergunta: string;
+  resposta: string;
+  materia_id: number;
+  dificuldade: "easy" | "medium" | "hard";
+  revisado: boolean;
+  materia_nome?: string;
 }
 
-const initialFlashcards: Flashcard[] = [
-  { id: 1, question: "O que é o princípio da legalidade?", answer: "O princípio que estabelece que a Administração Pública só pode fazer o que a lei permite.", subject: "Direito Constitucional", difficulty: "medium", reviewed: false },
-  { id: 2, question: "Qual a diferença entre sujeito e predicado?", answer: "Sujeito é o termo sobre o qual se declara algo; predicado é o que se declara sobre o sujeito.", subject: "Português", difficulty: "easy", reviewed: true },
-  { id: 3, question: "O que é uma proposição simples?", answer: "É uma sentença declarativa que pode ser classificada como verdadeira ou falsa.", subject: "Raciocínio Lógico", difficulty: "easy", reviewed: false },
-];
-
-const subjects = ["Direito Constitucional", "Português", "Raciocínio Lógico", "Direito Administrativo"];
+interface Materia {
+  id: number;
+  nome: string;
+}
 
 const difficultyColors = {
   easy: "bg-green-100 text-green-700 border-green-200",
@@ -61,17 +60,54 @@ const difficultyLabels = {
 };
 
 const FlashcardsPage = () => {
-  const [flashcards, setFlashcards] = useState<Flashcard[]>(initialFlashcards);
+  const userId = parseInt(localStorage.getItem('userId') || '0');
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [materias, setMaterias] = useState<Materia[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [newCard, setNewCard] = useState({
-    question: "",
-    answer: "",
-    subject: subjects[0],
-    difficulty: "medium" as "easy" | "medium" | "hard",
+    pergunta: "",
+    resposta: "",
+    materia_id: 0,
+    dificuldade: "medium" as "easy" | "medium" | "hard",
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    if (!userId) return;
+    setIsLoading(true);
+    try {
+      const [flashcardsRes, materiasRes] = await Promise.all([
+        apiService.listarFlashcards(userId),
+        apiService.listarMaterias(userId)
+      ]);
+      
+      if (flashcardsRes.success && flashcardsRes.data) {
+        setFlashcards(flashcardsRes.data);
+      }
+      
+      if (materiasRes.success && materiasRes.data) {
+        setMaterias(materiasRes.data);
+        if (materiasRes.data.length > 0 && !newCard.materia_id) {
+          setNewCard({ ...newCard, materia_id: materiasRes.data[0].id });
+        }
+      }
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao carregar dados", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFlip = (id: number) => {
     setFlippedCards((prev) => {
@@ -85,55 +121,99 @@ const FlashcardsPage = () => {
     });
   };
 
-  const handleSave = () => {
-    if (!newCard.question.trim() || !newCard.answer.trim()) {
+  const handleSave = async () => {
+    if (!newCard.pergunta.trim() || !newCard.resposta.trim()) {
       toast({ title: "Erro", description: "Pergunta e resposta são obrigatórias", variant: "destructive" });
       return;
     }
 
-    if (editingCard) {
-      setFlashcards(flashcards.map(f => 
-        f.id === editingCard.id 
-          ? { ...f, ...newCard }
-          : f
-      ));
-      toast({ title: "Flashcard atualizado!" });
-    } else {
-      const newId = Math.max(...flashcards.map(f => f.id), 0) + 1;
-      setFlashcards([...flashcards, { id: newId, ...newCard, reviewed: false }]);
-      toast({ title: "Flashcard criado!" });
+    if (!newCard.materia_id) {
+      toast({ title: "Erro", description: "Selecione uma matéria", variant: "destructive" });
+      return;
     }
 
-    setIsDialogOpen(false);
-    setEditingCard(null);
-    setNewCard({ question: "", answer: "", subject: subjects[0], difficulty: "medium" });
+    try {
+      if (editingCard) {
+        await apiService.atualizarFlashcard(userId, editingCard.id, {
+          pergunta: newCard.pergunta,
+          resposta: newCard.resposta,
+          dificuldade: newCard.dificuldade,
+          materia_id: newCard.materia_id
+        });
+        toast({ title: "Flashcard atualizado!" });
+      } else {
+        await apiService.criarFlashcard(
+          userId,
+          newCard.materia_id,
+          newCard.pergunta,
+          newCard.resposta,
+          newCard.dificuldade
+        );
+        toast({ title: "Flashcard criado!" });
+      }
+      await loadData();
+      setIsDialogOpen(false);
+      setEditingCard(null);
+      if (materias.length > 0) {
+        setNewCard({ pergunta: "", resposta: "", materia_id: materias[0].id, dificuldade: "medium" });
+      }
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao salvar flashcard", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const handleEdit = (card: Flashcard) => {
     setEditingCard(card);
     setNewCard({ 
-      question: card.question, 
-      answer: card.answer, 
-      subject: card.subject, 
-      difficulty: card.difficulty 
+      pergunta: card.pergunta, 
+      resposta: card.resposta, 
+      materia_id: card.materia_id, 
+      dificuldade: card.dificuldade 
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setFlashcards(flashcards.filter(f => f.id !== id));
-    toast({ title: "Flashcard removido" });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiService.deletarFlashcard(userId, id);
+      toast({ title: "Flashcard removido" });
+      await loadData();
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao remover flashcard", 
+        variant: "destructive" 
+      });
+    }
   };
 
-  const toggleReviewed = (id: number) => {
-    setFlashcards(flashcards.map(f => 
-      f.id === id ? { ...f, reviewed: !f.reviewed } : f
-    ));
+  const toggleReviewed = async (id: number) => {
+    const card = flashcards.find(f => f.id === id);
+    if (!card) return;
+    
+    try {
+      await apiService.atualizarFlashcard(userId, id, {
+        revisado: !card.revisado
+      });
+      await loadData();
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Erro ao atualizar flashcard", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const openNewDialog = () => {
     setEditingCard(null);
-    setNewCard({ question: "", answer: "", subject: subjects[0], difficulty: "medium" });
+    if (materias.length > 0) {
+      setNewCard({ pergunta: "", resposta: "", materia_id: materias[0].id, dificuldade: "medium" });
+    }
     setIsDialogOpen(true);
   };
 
@@ -165,8 +245,8 @@ const FlashcardsPage = () => {
                 <Textarea
                   id="question"
                   placeholder="Digite a pergunta..."
-                  value={newCard.question}
-                  onChange={(e) => setNewCard({ ...newCard, question: e.target.value })}
+                  value={newCard.pergunta}
+                  onChange={(e) => setNewCard({ ...newCard, pergunta: e.target.value })}
                   className="min-h-[80px]"
                 />
               </div>
@@ -175,8 +255,8 @@ const FlashcardsPage = () => {
                 <Textarea
                   id="answer"
                   placeholder="Digite a resposta..."
-                  value={newCard.answer}
-                  onChange={(e) => setNewCard({ ...newCard, answer: e.target.value })}
+                  value={newCard.resposta}
+                  onChange={(e) => setNewCard({ ...newCard, resposta: e.target.value })}
                   className="min-h-[80px]"
                 />
               </div>
@@ -184,16 +264,16 @@ const FlashcardsPage = () => {
                 <div>
                   <Label>Matéria</Label>
                   <Select
-                    value={newCard.subject}
-                    onValueChange={(value) => setNewCard({ ...newCard, subject: value })}
+                    value={newCard.materia_id.toString()}
+                    onValueChange={(value) => setNewCard({ ...newCard, materia_id: parseInt(value) })}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject} value={subject}>
-                          {subject}
+                      {materias.map((materia) => (
+                        <SelectItem key={materia.id} value={materia.id.toString()}>
+                          {materia.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -202,9 +282,9 @@ const FlashcardsPage = () => {
                 <div>
                   <Label>Dificuldade</Label>
                   <Select
-                    value={newCard.difficulty}
+                    value={newCard.dificuldade}
                     onValueChange={(value: "easy" | "medium" | "hard") => 
-                      setNewCard({ ...newCard, difficulty: value })
+                      setNewCard({ ...newCard, dificuldade: value })
                     }
                   >
                     <SelectTrigger>
@@ -227,9 +307,16 @@ const FlashcardsPage = () => {
       </div>
 
       {/* Flashcards Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnimatePresence>
-          {flashcards.map((card, i) => (
+      {isLoading ? (
+        <div className="text-center py-10 text-muted-foreground">Carregando...</div>
+      ) : flashcards.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground">
+          <p>Nenhum flashcard encontrado. Crie seu primeiro flashcard!</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
+            {flashcards.map((card, i) => (
             <motion.div
               key={card.id}
               initial={{ opacity: 0, y: 20 }}
@@ -247,31 +334,33 @@ const FlashcardsPage = () => {
               >
                 {/* Front */}
                 <Card 
-                  className={`absolute inset-0 backface-hidden ${card.reviewed ? "border-green-300" : ""}`}
+                  className={`absolute inset-0 backface-hidden ${card.revisado ? "border-green-300" : ""}`}
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{card.subject}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {materias.find(m => m.id === card.materia_id)?.nome || 'Sem matéria'}
+                        </span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full border ${difficultyColors[card.difficulty]}`}>
-                        {difficultyLabels[card.difficulty]}
+                      <span className={`text-xs px-2 py-1 rounded-full border ${difficultyColors[card.dificuldade]}`}>
+                        {difficultyLabels[card.dificuldade]}
                       </span>
                     </div>
                     
                     <div className="flex-1 flex items-center justify-center">
-                      <p className="text-lg font-medium text-center">{card.question}</p>
+                      <p className="text-lg font-medium text-center">{card.pergunta}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleReviewed(card.id); }}
-                        className={`flex items-center gap-1 text-sm ${card.reviewed ? "text-green-600" : "text-muted-foreground"}`}
+                        className={`flex items-center gap-1 text-sm ${card.revisado ? "text-green-600" : "text-muted-foreground"}`}
                       >
                         <Check className="w-4 h-4" />
-                        {card.reviewed ? "Revisado" : "Marcar"}
+                        {card.revisado ? "Revisado" : "Marcar"}
                       </button>
                       <div className="flex gap-1">
                         <Button
@@ -306,7 +395,7 @@ const FlashcardsPage = () => {
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="text-xs opacity-70 mb-2">Resposta</div>
                     <div className="flex-1 flex items-center justify-center">
-                      <p className="text-lg text-center">{card.answer}</p>
+                      <p className="text-lg text-center">{card.resposta}</p>
                     </div>
                     <div className="absolute bottom-2 right-2 opacity-70">
                       <RotateCw className="w-4 h-4" />
@@ -315,9 +404,10 @@ const FlashcardsPage = () => {
                 </Card>
               </div>
             </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

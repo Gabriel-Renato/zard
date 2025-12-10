@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Zap, ArrowLeft, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiService from "@/services/api";
 
 const SolicitarCadastro = () => {
   const [nome, setNome] = useState("");
@@ -20,15 +21,24 @@ const SolicitarCadastro = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate sending request
-    setTimeout(() => {
-      setIsSubmitted(true);
+    try {
+      const response = await apiService.criarSolicitacao(nome, email, motivo);
+      if (response.success) {
+        setIsSubmitted(true);
+        toast({
+          title: "Solicitação enviada!",
+          description: "Você receberá um email quando seu cadastro for aprovado.",
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "Solicitação enviada!",
-        description: "Você receberá um email quando seu cadastro for aprovado.",
+        title: "Erro",
+        description: error.message || "Erro ao enviar solicitação",
+        variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   if (isSubmitted) {

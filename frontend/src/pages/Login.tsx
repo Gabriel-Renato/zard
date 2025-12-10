@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Zap, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiService from "@/services/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -20,19 +21,29 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - In production, this would connect to Supabase
-    setTimeout(() => {
-      if (email === "admin@zard.com" && password === "admin123") {
-        toast({ title: "Bem-vindo, Admin!", description: "Redirecionando para o painel..." });
-        navigate("/admin");
-      } else if (email && password) {
-        toast({ title: "Bem-vindo de volta!", description: "Redirecionando para seu dashboard..." });
-        navigate("/dashboard");
-      } else {
-        toast({ title: "Erro", description: "Credenciais inválidas", variant: "destructive" });
+    try {
+      const response = await apiService.login(email, password);
+      if (response.success && response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('userId', response.user.id.toString());
+        
+        if (response.user.tipo === 'admin') {
+          toast({ title: "Bem-vindo, Admin!", description: "Redirecionando para o painel..." });
+          navigate("/admin");
+        } else {
+          toast({ title: "Bem-vindo de volta!", description: "Redirecionando para seu dashboard..." });
+          navigate("/dashboard");
+        }
       }
+    } catch (error: any) {
+      toast({ 
+        title: "Erro", 
+        description: error.message || "Credenciais inválidas", 
+        variant: "destructive" 
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

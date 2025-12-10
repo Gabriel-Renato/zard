@@ -1,44 +1,38 @@
 <?php
-// Router simples para a API
-$requestUri = $_SERVER['REQUEST_URI'];
-$requestMethod = $_SERVER['REQUEST_METHOD'];
+// Página inicial da API - listar endpoints disponíveis
+header('Content-Type: application/json; charset=utf-8');
 
-// Remover query string
-$path = parse_url($requestUri, PHP_URL_PATH);
-$path = str_replace('/backend/api', '', $path);
-$path = trim($path, '/');
+$endpoints = [
+    'autenticação' => [
+        'POST /api/auth.php?action=login' => 'Fazer login',
+        'POST /api/auth.php?action=register' => 'Registrar usuário',
+    ],
+    'solicitações' => [
+        'GET /api/solicitacoes.php?status={status}' => 'Listar solicitações',
+        'POST /api/solicitacoes.php' => 'Criar solicitação',
+        'PUT /api/solicitacoes.php' => 'Atualizar solicitação',
+    ],
+    'matérias' => [
+        'GET /api/materias.php?user_id={id}' => 'Listar matérias',
+        'POST /api/materias.php?user_id={id}' => 'Criar matéria',
+        'PUT /api/materias.php?user_id={id}' => 'Atualizar matéria',
+        'DELETE /api/materias.php?user_id={id}&id={id}' => 'Deletar matéria',
+    ],
+    'flashcards' => [
+        'GET /api/flashcards.php?user_id={id}' => 'Listar flashcards',
+        'POST /api/flashcards.php?user_id={id}' => 'Criar flashcard',
+        'PUT /api/flashcards.php?user_id={id}' => 'Atualizar flashcard',
+        'DELETE /api/flashcards.php?user_id={id}&id={id}' => 'Deletar flashcard',
+    ],
+    'admin' => [
+        'GET /api/admin.php?action=stats' => 'Estatísticas do sistema',
+    ],
+];
 
-// Roteamento
-switch ($path) {
-    case 'auth':
-    case 'auth.php':
-        require_once 'auth.php';
-        break;
-    
-    case 'solicitacoes':
-    case 'solicitacoes.php':
-        require_once 'solicitacoes.php';
-        break;
-    
-    case 'materias':
-    case 'materias.php':
-        require_once 'materias.php';
-        break;
-    
-    case 'flashcards':
-    case 'flashcards.php':
-        require_once 'flashcards.php';
-        break;
-    
-    case 'admin':
-    case 'admin.php':
-        require_once 'admin.php';
-        break;
-    
-    default:
-        http_response_code(404);
-        echo json_encode(['error' => 'Endpoint não encontrado']);
-        break;
-}
+echo json_encode([
+    'api' => 'Zard Flashcard API',
+    'version' => '1.0',
+    'endpoints' => $endpoints
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 ?>
 

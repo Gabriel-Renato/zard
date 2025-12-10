@@ -1,0 +1,14 @@
+Options -MultiViews
+RewriteEngine On
+
+# Frontend - React Router (SPA)
+# Se não for um arquivo ou diretório existente, e não começar com /backend
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/backend
+RewriteRule ^ index.html [QSA,L]
+
+# Backend - Deixar passar direto para a pasta backend
+RewriteCond %{REQUEST_URI} ^/backend
+RewriteRule ^ - [L]
+

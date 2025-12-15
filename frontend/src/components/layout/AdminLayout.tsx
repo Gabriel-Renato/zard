@@ -47,42 +47,45 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border p-6
+        fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border
         transform transition-transform duration-300 lg:transform-none
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex flex-col
       `}>
-        <Link to="/" className="flex items-center gap-2 mb-10">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Zap className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold">Zard Admin</span>
-        </Link>
+        <div className="p-6">
+          <Link to="/" className="flex items-center gap-2 mb-10">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <Zap className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold">Zard Admin</span>
+          </Link>
 
-        <nav className="space-y-2">
-          {navItems.map((item) => {
-            // Para /admin, verificar se é exatamente /admin
-            // Para outras rotas, verificar se o pathname começa com o path do item
-            const isActive = item.path === "/admin" 
-              ? location.pathname === "/admin"
-              : location.pathname.startsWith(item.path);
-            return (
-              <Button
-                key={item.path}
-                variant={isActive ? "secondary" : "ghost"}
-                className="w-full justify-start gap-3"
-                onClick={() => {
-                  navigate(item.path);
-                  setIsSidebarOpen(false);
-                }}
-              >
-                <item.icon className="w-5 h-5" />
-                {item.label}
-              </Button>
-            );
-          })}
-        </nav>
+          <nav className="space-y-2">
+            {navItems.map((item) => {
+              // Para /admin, verificar se é exatamente /admin
+              // Para outras rotas, verificar se o pathname começa com o path do item
+              const isActive = item.path === "/admin" 
+                ? location.pathname === "/admin"
+                : location.pathname.startsWith(item.path);
+              return (
+                <Button
+                  key={item.path}
+                  variant={isActive ? "secondary" : "ghost"}
+                  className="w-full justify-start gap-3"
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.label}
+                </Button>
+              );
+            })}
+          </nav>
+        </div>
 
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="p-6 pt-0 mt-auto">
           <Button variant="ghost" className="w-full justify-start gap-3 text-destructive" onClick={handleLogout}>
             <LogOut className="w-5 h-5" />
             Sair

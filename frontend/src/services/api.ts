@@ -78,6 +78,17 @@ class ApiService {
     });
   }
 
+  async obterPerfil(userId: number) {
+    return this.request(`auth.php?action=perfil&user_id=${userId}`);
+  }
+
+  async atualizarPerfil(userId: number, data: { nome?: string; email?: string; senha?: string }) {
+    return this.request('auth.php?action=perfil', {
+      method: 'PUT',
+      body: JSON.stringify({ user_id: userId, ...data }),
+    });
+  }
+
   // Solicitações
   async criarSolicitacao(nome: string, email: string, motivo: string) {
     return this.request('solicitacoes.php', {

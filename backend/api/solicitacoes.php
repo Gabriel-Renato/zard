@@ -9,9 +9,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 try {
     switch ($method) {
         case 'GET':
-            $status = $_GET['status'] ?? 'pendente';
-            $stmt = $db->prepare("SELECT * FROM solicitacoes_cadastro WHERE status = ? ORDER BY criado_em DESC");
-            $stmt->execute([$status]);
+            $status = $_GET['status'] ?? null;
+            if ($status) {
+                $stmt = $db->prepare("SELECT * FROM solicitacoes_cadastro WHERE status = ? ORDER BY criado_em DESC");
+                $stmt->execute([$status]);
+            } else {
+                // Listar todas as solicitações
+                $stmt = $db->query("SELECT * FROM solicitacoes_cadastro ORDER BY criado_em DESC");
+            }
             $solicitacoes = $stmt->fetchAll();
             sendResponse(['success' => true, 'data' => $solicitacoes]);
             break;

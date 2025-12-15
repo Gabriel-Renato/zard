@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SolicitarCadastro from "./pages/SolicitarCadastro";
+import AdminLayout from "./components/layout/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsuarios from "./pages/admin/AdminUsuarios";
+import AdminSolicitacoes from "./pages/admin/AdminSolicitacoes";
+import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import Materias from "./pages/dashboard/Materias";
@@ -26,7 +30,12 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/solicitar-cadastro" element={<SolicitarCadastro />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="usuarios" element={<AdminUsuarios />} />
+            <Route path="solicitacoes" element={<AdminSolicitacoes />} />
+            <Route path="configuracoes" element={<AdminConfiguracoes />} />
+          </Route>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="materias" element={<Materias />} />

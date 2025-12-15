@@ -90,6 +90,10 @@ class ApiService {
     return this.request(`solicitacoes.php?status=${status}`);
   }
 
+  async listarTodasSolicitacoes() {
+    return this.request('solicitacoes.php');
+  }
+
   async atualizarSolicitacao(id: number, status: string) {
     return this.request('solicitacoes.php', {
       method: 'PUT',
@@ -177,6 +181,34 @@ class ApiService {
   // Admin
   async obterEstatisticas() {
     return this.request('admin.php?action=stats');
+  }
+
+  async listarUsuarios() {
+    return this.request('admin.php?action=usuarios');
+  }
+
+  async atualizarUsuario(id: number, data: { nome?: string; email?: string; tipo?: 'admin' | 'estudante'; ativo?: boolean }) {
+    return this.request('admin.php?action=usuarios', {
+      method: 'PUT',
+      body: JSON.stringify({ id, ...data }),
+    });
+  }
+
+  async deletarUsuario(id: number) {
+    return this.request(`admin.php?action=usuarios&id=${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async obterConfiguracoes() {
+    return this.request('admin.php?action=configuracoes');
+  }
+
+  async salvarConfiguracoes(configuracoes: any) {
+    return this.request('admin.php?action=configuracoes', {
+      method: 'PUT',
+      body: JSON.stringify(configuracoes),
+    });
   }
 }
 

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { User, Bell, Palette, Shield, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
 import apiService from "@/services/api";
 
 const Configuracoes = () => {
@@ -19,6 +20,7 @@ const Configuracoes = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadUserData();
@@ -261,7 +263,7 @@ const Configuracoes = () => {
                 <p className="font-medium">Modo escuro</p>
                 <p className="text-sm text-muted-foreground">Alternar entre tema claro e escuro</p>
               </div>
-              <Switch />
+              <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
             </div>
           </CardContent>
         </Card>

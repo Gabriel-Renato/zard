@@ -136,9 +136,7 @@ const Login = () => {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          Para testar: admin@zard.com / admin123 (admin) ou qualquer email/senha (estudante)
-        </p>
+        
       </motion.div>
     </div>
   );

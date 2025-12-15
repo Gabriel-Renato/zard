@@ -53,6 +53,17 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-primary-foreground/50">
           <p>&copy; {new Date().getFullYear()} Zard. Todos os direitos reservados.</p>
+          <p className="mt-2">
+            Desenvolvido por{" "}
+            <a 
+              href="https://potfolio-mu-liart.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-foreground/70 hover:text-primary-foreground transition-colors underline"
+            >
+              Gabriel Renato Souza de Araujo
+            </a>
+          </p>
         </div>
       </div>
     </footer>

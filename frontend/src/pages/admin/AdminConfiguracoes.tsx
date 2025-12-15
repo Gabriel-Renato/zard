@@ -10,9 +10,12 @@ import {
   Database,
   Mail,
   Shield,
-  Globe
+  Globe,
+  Palette
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
 import apiService from "@/services/api";
 
 interface Configuracoes {
@@ -36,6 +39,7 @@ const AdminConfiguracoes = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadConfiguracoes();
@@ -216,6 +220,30 @@ const AdminConfiguracoes = () => {
                 <p className="text-sm text-muted-foreground mt-1">
                   Intervalo padrão em dias para revisão de flashcards
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Aparência */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5" />
+                Aparência
+              </CardTitle>
+              <CardDescription>
+                Personalize a interface do sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="modo_escuro">Modo escuro</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Alternar entre tema claro e escuro
+                  </p>
+                </div>
+                <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
               </div>
             </CardContent>
           </Card>

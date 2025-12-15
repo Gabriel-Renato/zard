@@ -148,3 +148,4 @@ Em caso de problemas, verifique:
 2. Console do navegador (F12)
 3. Logs do MySQL
 
+

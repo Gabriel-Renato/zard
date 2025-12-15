@@ -22,10 +22,17 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await apiService.login(email, password);
+      const response: any = await apiService.login(email, password);
       if (response.success && response.user) {
         localStorage.setItem('user', JSON.stringify(response.user));
         localStorage.setItem('userId', response.user.id.toString());
+        
+        // Verificar se o usuário foi aprovado
+        if (response.aprovado === false) {
+          // Usuário não aprovado, redirecionar para página de análise
+          navigate("/em-analise");
+          return;
+        }
         
         if (response.user.tipo === 'admin') {
           toast({ title: "Bem-vindo, Admin!", description: "Redirecionando para o painel..." });

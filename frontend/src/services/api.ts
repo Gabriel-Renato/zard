@@ -90,10 +90,10 @@ class ApiService {
   }
 
   // Solicitações
-  async criarSolicitacao(nome: string, email: string, motivo: string) {
+  async criarSolicitacao(nome: string, email: string, motivo: string, senha: string) {
     return this.request('solicitacoes.php', {
       method: 'POST',
-      body: JSON.stringify({ nome, email, motivo }),
+      body: JSON.stringify({ nome, email, motivo, senha }),
     });
   }
 

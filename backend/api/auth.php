@@ -50,10 +50,38 @@ try {
                     sendError('Usuário inativo', 403);
                 }
 
+                // Verificar se o usuário tem uma solicitação aprovada
+                // Se não for admin, verificar status da solicitação
+                if ($user['tipo'] === 'estudante') {
+                    $stmt = $db->prepare("SELECT status FROM solicitacoes_cadastro WHERE email = ? ORDER BY criado_em DESC LIMIT 1");
+                    $stmt->execute([$data['email']]);
+                    $solicitacao = $stmt->fetch();
+                    
+                    if ($solicitacao) {
+                        if ($solicitacao['status'] === 'pendente') {
+                            unset($user['senha']);
+                            sendResponse([
+                                'success' => true,
+                                'user' => $user,
+                                'aprovado' => false,
+                                'message' => 'Cadastro em análise'
+                            ]);
+                            return;
+                        } elseif ($solicitacao['status'] === 'rejeitado') {
+                            sendError('Sua solicitação de cadastro foi rejeitada. Entre em contato com o administrador.', 403);
+                            return;
+                        }
+                    } else {
+                        // Se não tem solicitação, pode ser um usuário criado diretamente (admin ou antigo)
+                        // Permitir acesso
+                    }
+                }
+
                 unset($user['senha']);
                 sendResponse([
                     'success' => true,
                     'user' => $user,
+                    'aprovado' => true,
                     'message' => 'Login realizado com sucesso'
                 ]);
             } elseif ($action === 'register') {

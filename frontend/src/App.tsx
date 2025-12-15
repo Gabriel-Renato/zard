@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import SolicitarCadastro from "./pages/SolicitarCadastro";
+import EmAnalise from "./pages/EmAnalise";
 import AdminLayout from "./components/layout/AdminLayout";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsuarios from "./pages/admin/AdminUsuarios";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/solicitar-cadastro" element={<SolicitarCadastro />} />
+          <Route path="/em-analise" element={<EmAnalise />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="usuarios" element={<AdminUsuarios />} />

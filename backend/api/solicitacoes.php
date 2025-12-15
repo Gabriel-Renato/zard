@@ -29,23 +29,37 @@ try {
                 sendError('JSON inválido: ' . json_last_error_msg(), 400);
             }
             
-            validateRequired($data, ['nome', 'email', 'motivo']);
+            validateRequired($data, ['nome', 'email', 'motivo', 'senha']);
 
-            // Verificar se a tabela existe (usando uma query de teste)
-            try {
-                $testStmt = $db->query("SELECT 1 FROM solicitacoes_cadastro LIMIT 1");
-            } catch (PDOException $e) {
-                // Se a tabela não existe, pode ser que tenha outro nome
-                sendError('Tabela "solicitacoes_cadastro" não encontrada. Verifique se o banco de dados está configurado corretamente.', 500);
+            // Verificar se email já existe em solicitações pendentes ou aprovadas
+            $stmt = $db->prepare("SELECT id, status FROM solicitacoes_cadastro WHERE email = ? AND status IN ('pendente', 'aprovado')");
+            $stmt->execute([$data['email']]);
+            $solicitacaoExistente = $stmt->fetch();
+            if ($solicitacaoExistente) {
+                sendError('Já existe uma solicitação para este email', 409);
             }
 
+            // Verificar se email já existe em usuários
+            $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = ?");
+            $stmt->execute([$data['email']]);
+            if ($stmt->fetch()) {
+                sendError('Este email já está cadastrado', 409);
+            }
+
+            // Criar solicitação
             $stmt = $db->prepare("INSERT INTO solicitacoes_cadastro (nome, email, motivo) VALUES (?, ?, ?)");
             $stmt->execute([$data['nome'], $data['email'], $data['motivo']]);
+            $solicitacaoId = $db->lastInsertId();
+
+            // Criar usuário imediatamente com senha (mas ainda não aprovado)
+            $hashedPassword = password_hash($data['senha'], PASSWORD_DEFAULT);
+            $stmt = $db->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
+            $stmt->execute([$data['nome'], $data['email'], $hashedPassword]);
 
             sendResponse([
                 'success' => true,
-                'message' => 'Solicitação enviada com sucesso',
-                'id' => $db->lastInsertId()
+                'message' => 'Solicitação enviada com sucesso. Aguarde a aprovação do administrador.',
+                'id' => $solicitacaoId
             ], 201);
             break;
 
@@ -61,23 +75,24 @@ try {
             $stmt = $db->prepare("UPDATE solicitacoes_cadastro SET status = ? WHERE id = ?");
             $stmt->execute([$data['status'], $data['id']]);
 
-            // Se aprovado, criar usuário
-            if ($data['status'] === 'aprovado') {
-                $stmt = $db->prepare("SELECT * FROM solicitacoes_cadastro WHERE id = ?");
+            // Usuário já foi criado quando a solicitação foi feita, apenas atualizar status
+            // Se rejeitado, podemos desativar o usuário (opcional)
+            if ($data['status'] === 'rejeitado') {
+                $stmt = $db->prepare("SELECT email FROM solicitacoes_cadastro WHERE id = ?");
                 $stmt->execute([$data['id']]);
                 $solicitacao = $stmt->fetch();
-
                 if ($solicitacao) {
-                    // Verificar se já existe usuário com esse email
-                    $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = ?");
+                    $stmt = $db->prepare("UPDATE usuarios SET ativo = 0 WHERE email = ?");
                     $stmt->execute([$solicitacao['email']]);
-                    if (!$stmt->fetch()) {
-                        // Criar senha temporária (usuário deve trocar no primeiro login)
-                        $senhaTemporaria = bin2hex(random_bytes(8));
-                        $hashedPassword = password_hash($senhaTemporaria, PASSWORD_DEFAULT);
-                        $stmt = $db->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
-                        $stmt->execute([$solicitacao['nome'], $solicitacao['email'], $hashedPassword]);
-                    }
+                }
+            } elseif ($data['status'] === 'aprovado') {
+                // Garantir que o usuário está ativo quando aprovado
+                $stmt = $db->prepare("SELECT email FROM solicitacoes_cadastro WHERE id = ?");
+                $stmt->execute([$data['id']]);
+                $solicitacao = $stmt->fetch();
+                if ($solicitacao) {
+                    $stmt = $db->prepare("UPDATE usuarios SET ativo = 1 WHERE email = ?");
+                    $stmt->execute([$solicitacao['email']]);
                 }
             }
 

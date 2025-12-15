@@ -1,4 +1,20 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost/zard-flashcard-mastery/backend/api';
+// Detectar automaticamente o ambiente e definir a URL da API
+const getApiUrl = () => {
+  // Se tiver variável de ambiente definida, usar ela
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Se estiver em produção (https)
+  if (window.location.protocol === 'https:' || window.location.hostname !== 'localhost') {
+    return 'https://zardflashcard.gt.tc/backend/api';
+  }
+  
+  // Desenvolvimento local
+  return 'http://localhost/zard-flashcard-mastery/backend/api';
+};
+
+const API_BASE_URL = getApiUrl();
 
 interface ApiResponse<T> {
   success: boolean;

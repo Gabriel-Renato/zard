@@ -17,8 +17,12 @@ function sendResponse($data, $statusCode = 200) {
     exit();
 }
 
-function sendError($message, $statusCode = 400) {
-    sendResponse(['error' => $message], $statusCode);
+function sendError($message, $statusCode = 400, $details = null) {
+    $response = ['error' => $message];
+    if ($details && (defined('DEBUG') && DEBUG)) {
+        $response['details'] = $details;
+    }
+    sendResponse($response, $statusCode);
 }
 
 function getJsonInput() {

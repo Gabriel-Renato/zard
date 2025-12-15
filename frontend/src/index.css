@@ -4,113 +4,113 @@
 
 @layer base {
   :root {
-    /* Zard Brand Colors - Deep Teal & Warm Amber */
-    --background: 40 33% 98%;
-    --foreground: 200 25% 15%;
+    /* Zard Brand Colors - Deep Blue & Cyan */
+    --background: 220 20% 98%;
+    --foreground: 220 30% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 25% 15%;
+    --card-foreground: 220 30% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 25% 15%;
+    --popover-foreground: 220 30% 15%;
 
-    /* Primary: Deep Teal */
-    --primary: 174 62% 32%;
+    /* Primary: Deep Blue */
+    --primary: 220 75% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 174 62% 45%;
+    --primary-glow: 220 75% 50%;
 
-    /* Secondary: Warm Cream */
-    --secondary: 40 30% 94%;
-    --secondary-foreground: 200 25% 20%;
+    /* Secondary: Light Blue Gray */
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 220 30% 20%;
 
-    /* Accent: Warm Amber */
-    --accent: 38 92% 50%;
-    --accent-foreground: 200 25% 15%;
+    /* Accent: Cyan/Blue */
+    --accent: 195 100% 50%;
+    --accent-foreground: 220 30% 15%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 200 15% 45%;
+    --muted: 220 12% 92%;
+    --muted-foreground: 220 15% 45%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 174 62% 32%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 220 75% 35%;
 
     --radius: 0.75rem;
 
     /* Custom Zard tokens */
-    --zard-teal: 174 62% 32%;
-    --zard-teal-light: 174 50% 45%;
-    --zard-teal-dark: 174 70% 22%;
-    --zard-amber: 38 92% 50%;
-    --zard-amber-light: 40 95% 65%;
-    --zard-coral: 12 76% 61%;
-    --zard-cream: 40 33% 98%;
-    --zard-sage: 150 25% 70%;
+    --zard-teal: 220 75% 35%;
+    --zard-teal-light: 220 70% 50%;
+    --zard-teal-dark: 220 80% 25%;
+    --zard-amber: 195 100% 50%;
+    --zard-amber-light: 195 95% 65%;
+    --zard-coral: 210 100% 56%;
+    --zard-cream: 220 20% 98%;
+    --zard-sage: 195 60% 70%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(174, 62%, 32%) 0%, hsl(174, 50%, 45%) 50%, hsl(38, 92%, 50%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(40, 30%, 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(12, 76%, 61%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220, 75%, 35%) 0%, hsl(220, 70%, 50%) 50%, hsl(195, 100%, 50%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(220, 20%, 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(195, 100%, 50%) 0%, hsl(210, 100%, 56%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 2px 8px -2px hsl(200, 25%, 15%, 0.08);
-    --shadow-md: 0 8px 24px -8px hsl(200, 25%, 15%, 0.12);
-    --shadow-lg: 0 16px 48px -16px hsl(200, 25%, 15%, 0.16);
-    --shadow-glow: 0 0 40px hsl(174, 62%, 32%, 0.25);
-    --shadow-card: 0 4px 20px -4px hsl(200, 25%, 15%, 0.1);
-    --shadow-card-hover: 0 12px 32px -8px hsl(200, 25%, 15%, 0.18);
+    --shadow-sm: 0 2px 8px -2px hsl(220, 30%, 15%, 0.08);
+    --shadow-md: 0 8px 24px -8px hsl(220, 30%, 15%, 0.12);
+    --shadow-lg: 0 16px 48px -16px hsl(220, 30%, 15%, 0.16);
+    --shadow-glow: 0 0 40px hsl(220, 75%, 35%, 0.25);
+    --shadow-card: 0 4px 20px -4px hsl(220, 30%, 15%, 0.1);
+    --shadow-card-hover: 0 12px 32px -8px hsl(220, 30%, 15%, 0.18);
 
     /* Sidebar */
-    --sidebar-background: 40 33% 98%;
-    --sidebar-foreground: 200 25% 25%;
-    --sidebar-primary: 174 62% 32%;
+    --sidebar-background: 220 20% 98%;
+    --sidebar-foreground: 220 30% 25%;
+    --sidebar-primary: 220 75% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 30% 94%;
-    --sidebar-accent-foreground: 200 25% 20%;
-    --sidebar-border: 40 20% 88%;
-    --sidebar-ring: 174 62% 32%;
+    --sidebar-accent: 220 15% 94%;
+    --sidebar-accent-foreground: 220 30% 20%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 220 75% 35%;
   }
 
   .dark {
-    --background: 200 25% 8%;
-    --foreground: 40 30% 95%;
+    --background: 220 30% 8%;
+    --foreground: 220 15% 95%;
 
-    --card: 200 20% 12%;
-    --card-foreground: 40 30% 95%;
+    --card: 220 25% 12%;
+    --card-foreground: 220 15% 95%;
 
-    --popover: 200 20% 12%;
-    --popover-foreground: 40 30% 95%;
+    --popover: 220 25% 12%;
+    --popover-foreground: 220 15% 95%;
 
-    --primary: 174 55% 45%;
-    --primary-foreground: 200 25% 8%;
-    --primary-glow: 174 55% 55%;
+    --primary: 220 70% 50%;
+    --primary-foreground: 220 30% 8%;
+    --primary-glow: 220 70% 60%;
 
-    --secondary: 200 20% 18%;
-    --secondary-foreground: 40 30% 90%;
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 220 15% 90%;
 
-    --accent: 38 92% 55%;
-    --accent-foreground: 200 25% 8%;
+    --accent: 195 100% 55%;
+    --accent-foreground: 220 30% 8%;
 
-    --muted: 200 15% 20%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 220 20% 20%;
+    --muted-foreground: 220 15% 60%;
 
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 15% 20%;
-    --input: 200 15% 20%;
-    --ring: 174 55% 45%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 220 70% 50%;
 
-    --sidebar-background: 200 25% 10%;
-    --sidebar-foreground: 40 30% 90%;
-    --sidebar-primary: 174 55% 45%;
-    --sidebar-primary-foreground: 200 25% 8%;
-    --sidebar-accent: 200 20% 15%;
-    --sidebar-accent-foreground: 40 30% 90%;
-    --sidebar-border: 200 15% 18%;
-    --sidebar-ring: 174 55% 45%;
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 220 15% 90%;
+    --sidebar-primary: 220 70% 50%;
+    --sidebar-primary-foreground: 220 30% 8%;
+    --sidebar-accent: 220 25% 15%;
+    --sidebar-accent-foreground: 220 15% 90%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 220 70% 50%;
   }
 }
 

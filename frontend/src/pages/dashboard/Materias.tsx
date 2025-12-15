@@ -25,8 +25,8 @@ import { useToast } from "@/hooks/use-toast";
 import apiService from "@/services/api";
 
 const colorOptions = [
-  "#0D9488", "#F59E0B", "#EC4899", "#8B5CF6", 
-  "#10B981", "#EF4444", "#3B82F6", "#F97316"
+  "#1e40af", "#2563eb", "#3b82f6", "#60a5fa", 
+  "#0ea5e9", "#06b6d4", "#0284c7", "#0369a1"
 ];
 
 interface Subject {

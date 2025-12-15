@@ -48,9 +48,9 @@ interface Materia {
 }
 
 const difficultyColors = {
-  easy: "bg-green-100 text-green-700 border-green-200",
-  medium: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  hard: "bg-red-100 text-red-700 border-red-200",
+  easy: "bg-blue-100 text-blue-700 border-blue-200",
+  medium: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  hard: "bg-indigo-100 text-indigo-700 border-indigo-200",
 };
 
 const difficultyLabels = {
@@ -334,7 +334,7 @@ const FlashcardsPage = () => {
               >
                 {/* Front */}
                 <Card 
-                  className={`absolute inset-0 backface-hidden ${card.revisado ? "border-green-300" : ""}`}
+                  className={`absolute inset-0 backface-hidden ${card.revisado ? "border-blue-300" : ""}`}
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <CardContent className="p-6 h-full flex flex-col">
@@ -357,7 +357,7 @@ const FlashcardsPage = () => {
                     <div className="flex items-center justify-between pt-4 border-t">
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleReviewed(card.id); }}
-                        className={`flex items-center gap-1 text-sm ${card.revisado ? "text-green-600" : "text-muted-foreground"}`}
+                        className={`flex items-center gap-1 text-sm ${card.revisado ? "text-blue-600" : "text-muted-foreground"}`}
                       >
                         <Check className="w-4 h-4" />
                         {card.revisado ? "Revisado" : "Marcar"}

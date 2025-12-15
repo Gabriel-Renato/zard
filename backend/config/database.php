@@ -1,9 +1,9 @@
 <?php
 class Database {
-    private $host = "localhost";
-    private $db_name = "zard_flashcard";
-    private $username = "root";
-    private $password = "";
+    private $host = "sql100.byetcluster.com";
+    private $db_name = "if0_40649761_zard";
+    private $username = "if0_40649761";
+    private $password = "DxZ9y356rRbtkAj";
     private $conn;
 
     public function getConnection() {

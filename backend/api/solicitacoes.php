@@ -18,7 +18,21 @@ try {
 
         case 'POST':
             $data = getJsonInput();
+            
+            // Verificar se conseguiu decodificar o JSON
+            if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+                sendError('JSON inválido: ' . json_last_error_msg(), 400);
+            }
+            
             validateRequired($data, ['nome', 'email', 'motivo']);
+
+            // Verificar se a tabela existe (usando uma query de teste)
+            try {
+                $testStmt = $db->query("SELECT 1 FROM solicitacoes_cadastro LIMIT 1");
+            } catch (PDOException $e) {
+                // Se a tabela não existe, pode ser que tenha outro nome
+                sendError('Tabela "solicitacoes_cadastro" não encontrada. Verifique se o banco de dados está configurado corretamente.', 500);
+            }
 
             $stmt = $db->prepare("INSERT INTO solicitacoes_cadastro (nome, email, motivo) VALUES (?, ?, ?)");
             $stmt->execute([$data['nome'], $data['email'], $data['motivo']]);
@@ -68,9 +82,17 @@ try {
         default:
             sendError('Método não permitido', 405);
     }
+} catch (PDOException $e) {
+    error_log("PDO Error: " . $e->getMessage());
+    // Verificar se é erro de tabela não encontrada
+    if (strpos($e->getMessage(), "doesn't exist") !== false || strpos($e->getMessage(), "Table") !== false) {
+        sendError('Erro: Tabela não encontrada. Verifique se a tabela "solicitacoes_cadastro" existe no banco de dados.', 500);
+    } else {
+        sendError('Erro ao conectar com o banco de dados: ' . $e->getMessage(), 500);
+    }
 } catch (Exception $e) {
-    error_log($e->getMessage());
-    sendError('Erro interno do servidor', 500);
+    error_log("Error: " . $e->getMessage());
+    sendError('Erro interno do servidor: ' . $e->getMessage(), 500);
 }
 ?>
 

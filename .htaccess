@@ -6,16 +6,27 @@ RewriteEngine On
     AddType application/json .json
 </IfModule>
 
+# CRÍTICO: Garantir que manifest.json seja servido como arquivo estático
+# Esta regra DEVE vir ANTES do rewrite do SPA
+RewriteCond %{REQUEST_URI} ^/manifest\.json$
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^manifest\.json$ - [L]
+
+# Service Workers também devem ser servidos como arquivos estáticos
+RewriteCond %{REQUEST_URI} ^/(service-worker|service-worker-register)\.js$
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Ícones também devem ser servidos como arquivos estáticos
+RewriteCond %{REQUEST_URI} ^/icons/
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
 # Frontend - React Router (SPA)
 # Se não for um arquivo ou diretório existente, e não começar com /backend
-# IMPORTANTE: manifest.json e service-worker.js devem ser excluídos do rewrite
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/backend
-RewriteCond %{REQUEST_URI} !^/manifest\.json$
-RewriteCond %{REQUEST_URI} !^/service-worker\.js$
-RewriteCond %{REQUEST_URI} !^/service-worker-register\.js$
-RewriteCond %{REQUEST_URI} !^/icons/
 RewriteRule ^ index.html [QSA,L]
 
 # Backend - Deixar passar direto para a pasta backend

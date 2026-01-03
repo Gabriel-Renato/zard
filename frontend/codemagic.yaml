@@ -35,39 +35,62 @@ workflows:
       - name: Export IPA
         script: |
           # Verificar diretório atual e localizar export_options.plist
+          echo "=== DEBUG: Export IPA ==="
           echo "Diretório atual: $(pwd)"
+          echo "CM_BUILD_DIR: $CM_BUILD_DIR"
           echo "Procurando export_options.plist..."
           
           # Tentar diferentes caminhos possíveis
           EXPORT_OPTIONS_PATH=""
           if [ -f "frontend/ios/App/export_options.plist" ]; then
             EXPORT_OPTIONS_PATH="frontend/ios/App/export_options.plist"
+            echo "✓ Encontrado em: frontend/ios/App/export_options.plist"
           elif [ -f "ios/App/export_options.plist" ]; then
             EXPORT_OPTIONS_PATH="ios/App/export_options.plist"
+            echo "✓ Encontrado em: ios/App/export_options.plist"
           elif [ -f "./export_options.plist" ]; then
             EXPORT_OPTIONS_PATH="./export_options.plist"
+            echo "✓ Encontrado em: ./export_options.plist"
           else
-            echo "ERRO: export_options.plist não encontrado em nenhum local!"
-            find . -name "export_options.plist" -o -name "ExportOptions.plist" 2>/dev/null || true
+            echo "✗ ERRO: export_options.plist não encontrado!"
+            echo "Buscando todos os arquivos .plist..."
+            find . -name "*.plist" -type f 2>/dev/null | head -20 || true
             exit 1
           fi
           
-          echo "Arquivo encontrado em: $EXPORT_OPTIONS_PATH"
+          # Mostrar conteúdo do arquivo encontrado
+          echo "Conteúdo do arquivo encontrado:"
+          cat "$EXPORT_OPTIONS_PATH" || true
           
-          # Copiar para local acessível
-          cp "$EXPORT_OPTIONS_PATH" $CM_BUILD_DIR/export_options.plist
-          echo "Arquivo copiado para $CM_BUILD_DIR/export_options.plist"
+          # Criar diretório de destino se não existir
+          mkdir -p $CM_BUILD_DIR
+          
+          # Copiar para local acessível com caminho absoluto
+          ABSOLUTE_PATH=$(realpath "$EXPORT_OPTIONS_PATH" 2>/dev/null || echo "$(pwd)/$EXPORT_OPTIONS_PATH")
+          echo "Caminho absoluto: $ABSOLUTE_PATH"
+          
+          cp "$EXPORT_OPTIONS_PATH" "$CM_BUILD_DIR/export_options.plist"
+          echo "Arquivo copiado para: $CM_BUILD_DIR/export_options.plist"
           
           # Verificar se foi copiado
           if [ ! -f "$CM_BUILD_DIR/export_options.plist" ]; then
-            echo "ERRO: Falha ao copiar export_options.plist!"
+            echo "✗ ERRO: Falha ao copiar export_options.plist!"
+            ls -la $CM_BUILD_DIR/ || true
             exit 1
           fi
           
+          # Verificar conteúdo do arquivo copiado
+          echo "Conteúdo do arquivo copiado:"
+          cat "$CM_BUILD_DIR/export_options.plist" || true
+          
+          # Usar caminho absoluto no xcodebuild
+          EXPORT_PLIST_ABS=$(realpath "$CM_BUILD_DIR/export_options.plist" 2>/dev/null || echo "$CM_BUILD_DIR/export_options.plist")
+          echo "Usando arquivo: $EXPORT_PLIST_ABS"
+          
           xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/build/App.xcarchive \
-            -exportPath $CM_BUILD_DIR/build/ipa \
-            -exportOptionsPlist $CM_BUILD_DIR/export_options.plist
+            -archivePath "$CM_BUILD_DIR/build/App.xcarchive" \
+            -exportPath "$CM_BUILD_DIR/build/ipa" \
+            -exportOptionsPlist "$EXPORT_PLIST_ABS"
     artifacts:
       - build/ipa/*.ipa
     publishing:

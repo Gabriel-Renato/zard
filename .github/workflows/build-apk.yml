@@ -28,7 +28,13 @@ jobs:
     
     - name: Instalar dependências
       working-directory: ./frontend
-      run: npm ci
+      run: |
+        npm ci
+        # Verificar se Capacitor foi instalado
+        if [ ! -d "node_modules/@capacitor" ]; then
+          echo "❌ Capacitor não foi instalado"
+          exit 1
+        fi
     
     - name: Build do projeto
       working-directory: ./frontend
@@ -43,29 +49,45 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
     
-    - name: Verificar/Criar projeto Android
+    - name: Verificar projeto Android
       working-directory: ./frontend
       run: |
-        # Se o projeto Android não existir, criar
         if [ ! -d "android" ]; then
           echo "📱 Criando projeto Android..."
-          npx cap add android || {
-            echo "❌ Erro ao criar projeto Android"
-            exit 1
-          }
+          npx cap add android
         else
           echo "✅ Projeto Android encontrado"
+        fi
+        # Verificar se dist existe
+        if [ ! -d "dist" ]; then
+          echo "❌ Pasta dist não encontrada. Build pode ter falhado."
+          exit 1
         fi
     
     - name: Sincronizar Capacitor
       working-directory: ./frontend
       run: |
         echo "🔄 Sincronizando Capacitor..."
-        npx cap sync android || {
+        # Verificar se Capacitor está instalado
+        if ! command -v npx &> /dev/null; then
+          echo "❌ npx não encontrado"
+          exit 1
+        fi
+        # Sincronizar com output detalhado
+        npx cap sync android --verbose || {
           echo "❌ Erro ao sincronizar Capacitor"
-          echo "📋 Verificando estrutura do projeto..."
+          echo "📋 Debug info:"
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Capacitor version: $(npx cap --version 2>/dev/null || echo 'não encontrado')"
+          echo "Estrutura atual:"
           ls -la
-          ls -la android/ 2>/dev/null || echo "Pasta android não existe"
+          if [ -d "android" ]; then
+            echo "Pasta android existe"
+            ls -la android/ | head -10
+          else
+            echo "Pasta android NÃO existe"
+          fi
           exit 1
         }
     

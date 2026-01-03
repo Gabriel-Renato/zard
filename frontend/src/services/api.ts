@@ -5,12 +5,18 @@ const getApiUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
   
-  // Se estiver em produção (https)
-  if (window.location.protocol === 'https:' || window.location.hostname !== 'localhost') {
+  // Detectar se está rodando no app nativo (Capacitor)
+  const isNative = (window as any).Capacitor?.isNativePlatform() || 
+                   window.location.protocol === 'capacitor:' ||
+                   window.location.protocol === 'ionic:' ||
+                   window.location.hostname === 'localhost' && window.location.port === '';
+  
+  // Se estiver no app nativo ou em produção (https), usar servidor remoto
+  if (isNative || window.location.protocol === 'https:' || window.location.hostname !== 'localhost') {
     return 'https://zardflashcard.gt.tc/backend/api';
   }
   
-  // Desenvolvimento local
+  // Desenvolvimento local (web)
   return 'http://localhost/zard-flashcard-mastery/backend/api';
 };
 

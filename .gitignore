@@ -36,3 +36,16 @@ composer.lock
 # Database
 *.sql.bak
 *.db
+
+# Android / Capacitor
+frontend/android/.gradle/
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/.idea/
+frontend/android/local.properties
+frontend/android/*.iml
+frontend/android/.cxx/
+*.jks
+*.keystore
+frontend/android/app/release/
+frontend/android/app/debug/

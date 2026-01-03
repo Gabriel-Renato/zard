@@ -1,0 +1,123 @@
+name: Build Android APK Release (Assinado)
+
+on:
+  workflow_dispatch:  # Apenas execução manual
+    inputs:
+      version:
+        description: 'Versão do app (ex: 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Instalar dependências
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Build do projeto
+      working-directory: ./frontend
+      run: npm run build
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Configurar Keystore
+      working-directory: ./frontend/android/app
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        if [ -z "$KEYSTORE_BASE64" ]; then
+          echo "⚠️  Keystore não configurado. Gerando APK de debug..."
+          exit 0
+        fi
+        echo "$KEYSTORE_BASE64" | base64 -d > zard-release-key.jks
+        
+        # Atualizar build.gradle com signing config
+        cat >> build.gradle << EOF
+        
+        android {
+            signingConfigs {
+                release {
+                    storeFile file('zard-release-key.jks')
+                    storePassword '$KEYSTORE_PASSWORD'
+                    keyAlias '$KEY_ALIAS'
+                    keyPassword '$KEY_PASSWORD'
+                }
+            }
+            buildTypes {
+                release {
+                    signingConfig signingConfigs.release
+                    minifyEnabled true
+                    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+            }
+        }
+        EOF
+    
+    - name: Sincronizar Capacitor
+      working-directory: ./frontend
+      run: npx cap sync android
+    
+    - name: Atualizar versão
+      working-directory: ./frontend/android/app
+      run: |
+        VERSION_CODE=$(date +%s)
+        sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" build.gradle
+        sed -i "s/versionName \".*\"/versionName \"${{ github.event.inputs.version }}\"/" build.gradle
+    
+    - name: Gerar APK Release
+      working-directory: ./frontend/android
+      run: ./gradlew assembleRelease
+    
+    - name: Upload APK como artefato
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-apk
+        path: frontend/android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 90
+    
+    - name: Criar Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: frontend/android/app/build/outputs/apk/release/app-release.apk
+        tag_name: v${{ github.event.inputs.version }}
+        name: Release v${{ github.event.inputs.version }}
+        body: |
+          APK de Release gerado automaticamente via GitHub Actions
+          
+          **Versão:** ${{ github.event.inputs.version }}
+          
+          **Como instalar:**
+          1. Baixe o APK
+          2. Transfira para seu dispositivo Android
+          3. Permita instalação de fontes desconhecidas
+          4. Instale o app
+          
+          ⚠️ **Importante:** Este é um APK assinado e pronto para distribuição.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

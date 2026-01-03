@@ -1,8 +1,13 @@
 # Capacitor usa Swift Package Manager (SPM), não CocoaPods
-# Este arquivo existe apenas para evitar erros no Codemagic
-# Não há dependências CocoaPods neste projeto
+# Este Podfile existe apenas para evitar erros no Codemagic
+# O projeto não usa CocoaPods - todas as dependências são via SPM
 
 platform :ios, '13.0'
 
-# Arquivo vazio - projeto usa SPM
+# Especificar o workspace (mesmo que não exista, evita erro)
+workspace 'App.xcworkspace'
 
+# Não há dependências - projeto usa SPM
+target 'App' do
+  # Vazio - sem dependências CocoaPods
+end

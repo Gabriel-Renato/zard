@@ -17,6 +17,10 @@ const config: CapacitorConfig = {
     },
     allowMixedContent: true,
   },
+  ios: {
+    scheme: 'Zard',
+    contentInset: 'automatic',
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,

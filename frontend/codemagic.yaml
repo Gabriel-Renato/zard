@@ -34,11 +34,12 @@ workflows:
             CODE_SIGNING_ALLOWED=NO
       - name: Export IPA
         script: |
-          cd ios/App
+          # Copiar export_options.plist para local acessível
+          cp ios/App/export_options.plist $CM_BUILD_DIR/export_options.plist
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/build/App.xcarchive \
             -exportPath $CM_BUILD_DIR/build/ipa \
-            -exportOptionsPlist export_options.plist
+            -exportOptionsPlist $CM_BUILD_DIR/export_options.plist
     artifacts:
       - build/ipa/*.ipa
     publishing:

@@ -1,3 +1,10 @@
+# ✅ Arquivo Codemagic Corrigido - Copie e Cole
+
+## 📋 Copie Este Arquivo Completo no Codemagic
+
+Vá em **Settings** > **codemagic.yaml** no Codemagic e **SUBSTITUA TUDO** por este conteúdo:
+
+```yaml
 workflows:
   ios-workflow:
     name: iOS Workflow
@@ -46,3 +53,37 @@ workflows:
         notify:
           success: true
           failure: false
+```
+
+## ✅ O Que Foi Removido
+
+- ❌ `cocoapods: default` (removido)
+- ❌ `Install CocoaPods dependencies` (removido)
+- ❌ `groups: app_store_credentials` (removido - não necessário agora)
+- ❌ `XCODE_WORKSPACE` (mudado para `XCODE_PROJECT`)
+- ❌ `cd frontend` (removido - workflow já roda em frontend)
+- ❌ `xcode-project use-profiles` (removido - não necessário sem assinatura)
+
+## ✅ O Que Foi Corrigido
+
+- ✅ Usa `XCODE_PROJECT` ao invés de `XCODE_WORKSPACE`
+- ✅ Caminhos corretos (sem `frontend/` extra)
+- ✅ Build simplificado
+- ✅ Sem CocoaPods
+
+## 🚀 Após Copiar
+
+1. **Salve o arquivo** no Codemagic
+2. **Inicie um novo build**
+3. **Deve funcionar agora!**
+
+## 📝 Passos do Workflow
+
+1. Install dependencies (npm ci)
+2. Build web assets (npm run build)
+3. Sync Capacitor (npx cap sync ios)
+4. Build ipa (xcodebuild archive)
+5. Export IPA (xcodebuild -exportArchive)
+
+**Total: 5 passos (sem CocoaPods!)**
+

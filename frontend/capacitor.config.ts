@@ -6,9 +6,9 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    // Comentado para usar conteúdo local (app funciona offline)
-    // url: 'https://zardflashcard.gt.tc',
-    // cleartext: true
+
+    url: 'https://zardflashcard.gt.tc',
+    cleartext: true
   },
   android: {
     buildOptions: {
@@ -16,10 +16,6 @@ const config: CapacitorConfig = {
       keystoreAlias: undefined,
     },
     allowMixedContent: true,
-  },
-  ios: {
-    scheme: 'Zard',
-    contentInset: 'automatic',
   },
   plugins: {
     SplashScreen: {

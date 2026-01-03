@@ -34,21 +34,31 @@ workflows:
             CODE_SIGNING_ALLOWED=NO
       - name: Export IPA
         script: |
-          # Verificar e copiar export_options.plist
-          echo "Verificando arquivo export_options.plist..."
-          ls -la ios/App/*.plist || echo "Arquivos plist não encontrados em ios/App/"
-          pwd
+          # Verificar diretório atual e localizar export_options.plist
+          echo "Diretório atual: $(pwd)"
+          echo "Procurando export_options.plist..."
           
-          # Copiar export_options.plist para local acessível
-          if [ -f "ios/App/export_options.plist" ]; then
-            cp ios/App/export_options.plist $CM_BUILD_DIR/export_options.plist
-            echo "Arquivo copiado para $CM_BUILD_DIR/export_options.plist"
+          # Tentar diferentes caminhos possíveis
+          EXPORT_OPTIONS_PATH=""
+          if [ -f "frontend/ios/App/export_options.plist" ]; then
+            EXPORT_OPTIONS_PATH="frontend/ios/App/export_options.plist"
+          elif [ -f "ios/App/export_options.plist" ]; then
+            EXPORT_OPTIONS_PATH="ios/App/export_options.plist"
+          elif [ -f "./export_options.plist" ]; then
+            EXPORT_OPTIONS_PATH="./export_options.plist"
           else
-            echo "ERRO: export_options.plist não encontrado!"
+            echo "ERRO: export_options.plist não encontrado em nenhum local!"
+            find . -name "export_options.plist" -o -name "ExportOptions.plist" 2>/dev/null || true
             exit 1
           fi
           
-          # Verificar se o arquivo foi copiado
+          echo "Arquivo encontrado em: $EXPORT_OPTIONS_PATH"
+          
+          # Copiar para local acessível
+          cp "$EXPORT_OPTIONS_PATH" $CM_BUILD_DIR/export_options.plist
+          echo "Arquivo copiado para $CM_BUILD_DIR/export_options.plist"
+          
+          # Verificar se foi copiado
           if [ ! -f "$CM_BUILD_DIR/export_options.plist" ]; then
             echo "ERRO: Falha ao copiar export_options.plist!"
             exit 1

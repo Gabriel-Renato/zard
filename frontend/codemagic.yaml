@@ -34,8 +34,26 @@ workflows:
             CODE_SIGNING_ALLOWED=NO
       - name: Export IPA
         script: |
+          # Verificar e copiar export_options.plist
+          echo "Verificando arquivo export_options.plist..."
+          ls -la ios/App/*.plist || echo "Arquivos plist não encontrados em ios/App/"
+          pwd
+          
           # Copiar export_options.plist para local acessível
-          cp ios/App/export_options.plist $CM_BUILD_DIR/export_options.plist
+          if [ -f "ios/App/export_options.plist" ]; then
+            cp ios/App/export_options.plist $CM_BUILD_DIR/export_options.plist
+            echo "Arquivo copiado para $CM_BUILD_DIR/export_options.plist"
+          else
+            echo "ERRO: export_options.plist não encontrado!"
+            exit 1
+          fi
+          
+          # Verificar se o arquivo foi copiado
+          if [ ! -f "$CM_BUILD_DIR/export_options.plist" ]; then
+            echo "ERRO: Falha ao copiar export_options.plist!"
+            exit 1
+          fi
+          
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/build/App.xcarchive \
             -exportPath $CM_BUILD_DIR/build/ipa \

@@ -22,9 +22,10 @@ workflows:
           npx cap sync ios
       - name: Build ipa
         script: |
+          cd ios/App
           xcodebuild archive \
-            -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
+            -project "App.xcodeproj" \
+            -scheme "App" \
             -archivePath $CM_BUILD_DIR/build/App.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \

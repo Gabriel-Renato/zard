@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Permitir acesso direto a todos os arquivos
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Redirecionar raiz da API para index.php
+RewriteCond %{REQUEST_URI} /api/?$
+RewriteRule ^api/?$ api/index.php [L]
+

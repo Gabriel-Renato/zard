@@ -1,73 +1,131 @@
-# Welcome to your Lovable project
+# Zard Flashcard Mastery
 
-## Project info
+Sistema de flashcards para estudos, separado em frontend (React) e backend (PHP com MySQL).
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Estrutura do Projeto
 
-## How can I edit this code?
+```
+zard-flashcard-mastery/
+├── frontend/          # Aplicação React/TypeScript
+├── backend/           # API PHP
+│   ├── api/          # Endpoints da API
+│   ├── config/       # Configurações
+│   └── database/     # Scripts SQL
+└── README.md
+```
 
-There are several ways of editing your application.
+## Requisitos
 
-**Use Lovable**
+- PHP 7.4 ou superior
+- MySQL 5.7 ou superior
+- Node.js 18+ e npm
+- Servidor web (Apache/Nginx)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Instalação
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Banco de Dados
 
-**Use your preferred IDE**
+1. Crie o banco de dados MySQL:
+```bash
+mysql -u root -p < backend/database/schema.sql
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Configure as credenciais do banco em `backend/config/database.php`:
+```php
+private $host = "localhost";
+private $db_name = "zard_flashcard";
+private $username = "root";
+private $password = "";
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 2. Backend PHP
 
-Follow these steps:
+1. Configure o servidor web para apontar para a pasta `backend/`
+2. Certifique-se de que o módulo `mod_rewrite` está habilitado (Apache)
+3. A API estará disponível em: `http://localhost/zard-flashcard-mastery/backend/api/`
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 3. Frontend React
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Entre na pasta do frontend:
+```bash
+cd frontend
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Instale as dependências:
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Configure a URL da API no arquivo `.env` (opcional):
+```env
+VITE_API_URL=http://localhost/zard-flashcard-mastery/backend/api
+```
+
+4. Inicie o servidor de desenvolvimento:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Endpoints da API
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Autenticação
+- `POST /api/auth.php?action=login` - Login
+- `POST /api/auth.php?action=register` - Registro
 
-**Use GitHub Codespaces**
+### Solicitações
+- `GET /api/solicitacoes.php?status=pendente` - Listar solicitações
+- `POST /api/solicitacoes.php` - Criar solicitação
+- `PUT /api/solicitacoes.php` - Atualizar status da solicitação
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Matérias
+- `GET /api/materias.php?user_id={id}` - Listar matérias
+- `GET /api/materias.php?user_id={id}&id={id}` - Obter matéria
+- `POST /api/materias.php` - Criar matéria
+- `PUT /api/materias.php` - Atualizar matéria
+- `DELETE /api/materias.php?user_id={id}&id={id}` - Deletar matéria
 
-## What technologies are used for this project?
+### Flashcards
+- `GET /api/flashcards.php?user_id={id}` - Listar flashcards
+- `GET /api/flashcards.php?user_id={id}&id={id}` - Obter flashcard
+- `POST /api/flashcards.php` - Criar flashcard
+- `PUT /api/flashcards.php` - Atualizar flashcard
+- `DELETE /api/flashcards.php?user_id={id}&id={id}` - Deletar flashcard
 
-This project is built with:
+### Admin
+- `GET /api/admin.php?action=stats` - Estatísticas do sistema
 
-- Vite
+## Usuário Padrão Admin
+
+- Email: `admin@zard.com`
+- Senha: `admin123`
+
+## Desenvolvimento
+
+### Backend
+- PHP 7.4+
+- PDO para MySQL
+- Headers CORS configurados
+
+### Frontend
+- React 18
 - TypeScript
-- React
-- shadcn-ui
+- Vite
 - Tailwind CSS
+- shadcn/ui
 
-## How can I deploy this project?
+## Produção
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Build do Frontend
+```bash
+cd frontend
+npm run build
+```
 
-## Can I connect a custom domain to my Lovable project?
+Os arquivos estarão em `frontend/dist/` e devem ser servidos por um servidor web.
 
-Yes, you can!
+### Backend
+Configure o servidor web para servir os arquivos PHP da pasta `backend/`.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Licença
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Este projeto é privado.

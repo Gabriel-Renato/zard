@@ -73,8 +73,8 @@ jobs:
           echo "❌ npx não encontrado"
           exit 1
         fi
-        # Sincronizar com output detalhado
-        npx cap sync android --verbose || {
+        # Sincronizar (sem --verbose, não é suportado)
+        npx cap sync android || {
           echo "❌ Erro ao sincronizar Capacitor"
           echo "📋 Debug info:"
           echo "Node version: $(node --version)"

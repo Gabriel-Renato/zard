@@ -34,10 +34,11 @@ workflows:
             CODE_SIGNING_ALLOWED=NO
       - name: Export IPA
         script: |
+          cd ios/App
           xcodebuild -exportArchive \
             -archivePath $CM_BUILD_DIR/build/App.xcarchive \
             -exportPath $CM_BUILD_DIR/build/ipa \
-            -exportOptionsPlist ios/App/export_options.plist
+            -exportOptionsPlist export_options.plist
     artifacts:
       - build/ipa/*.ipa
     publishing:

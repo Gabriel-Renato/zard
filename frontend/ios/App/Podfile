@@ -4,10 +4,13 @@
 
 platform :ios, '13.0'
 
-# Especificar o workspace (mesmo que não exista, evita erro)
-workspace 'App.xcworkspace'
+# Usar o projeto diretamente (não workspace)
+project 'App.xcodeproj'
 
 # Não há dependências - projeto usa SPM
 target 'App' do
   # Vazio - sem dependências CocoaPods
 end
+
+# Instalar sem criar workspace (já que não usamos CocoaPods)
+install! 'cocoapods', :deterministic_uuids => false

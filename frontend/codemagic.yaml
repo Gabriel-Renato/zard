@@ -10,7 +10,6 @@ workflows:
         BUNDLE_ID: "com.zard.flashcard"
       node: 22
       xcode: latest
-      cocoapods: default
     scripts:
       - name: Install dependencies
         script: |
@@ -21,10 +20,6 @@ workflows:
       - name: Sync Capacitor
         script: |
           npx cap sync ios
-      - name: Install CocoaPods dependencies
-        script: |
-          cd ios/App
-          pod install
       - name: Build ipa
         script: |
           xcodebuild archive \

@@ -6,13 +6,14 @@ const getApiUrl = () => {
   }
   
   // Detectar se está rodando no app nativo (Capacitor)
-  const isNative = (window as any).Capacitor?.isNativePlatform() || 
-                   window.location.protocol === 'capacitor:' ||
+  // No app nativo, o protocolo é 'capacitor:' ou 'https:' e hostname pode ser vazio
+  const isNative = window.location.protocol === 'capacitor:' ||
                    window.location.protocol === 'ionic:' ||
-                   window.location.hostname === 'localhost' && window.location.port === '';
+                   (window.location.hostname === '' && window.location.protocol !== 'http:') ||
+                   (window as any).Capacitor?.isNativePlatform?.();
   
   // Se estiver no app nativo ou em produção (https), usar servidor remoto
-  if (isNative || window.location.protocol === 'https:' || window.location.hostname !== 'localhost') {
+  if (isNative || (window.location.protocol === 'https:' && window.location.hostname !== 'localhost')) {
     return 'https://zardflashcard.gt.tc/backend/api';
   }
   

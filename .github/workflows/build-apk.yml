@@ -43,9 +43,22 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
     
+    - name: Verificar/Criar projeto Android
+      working-directory: ./frontend
+      run: |
+        # Se o projeto Android não existir, criar
+        if [ ! -d "android" ]; then
+          echo "📱 Criando projeto Android..."
+          npx cap add android
+        else
+          echo "✅ Projeto Android encontrado"
+        fi
+    
     - name: Sincronizar Capacitor
       working-directory: ./frontend
-      run: npx cap sync android
+      run: |
+        echo "🔄 Sincronizando Capacitor..."
+        npx cap sync android
     
     - name: Gerar APK Debug
       working-directory: ./frontend/android

@@ -34,76 +34,49 @@ workflows:
             CODE_SIGNING_ALLOWED=NO
       - name: Export IPA
         script: |
-          # Voltar para o diretório raiz do projeto
-          cd $CM_SOURCE_DIR || cd $CM_BUILD_DIR || cd $(pwd)
-          
-          # Verificar diretório atual e localizar export_options.plist
-          echo "=== DEBUG: Export IPA ==="
-          echo "Diretório atual: $(pwd)"
+          echo "=== Export IPA ==="
           echo "CM_BUILD_DIR: $CM_BUILD_DIR"
-          echo "CM_SOURCE_DIR: $CM_SOURCE_DIR"
-          echo "Procurando export_options.plist..."
           
-          # Tentar diferentes caminhos possíveis
-          EXPORT_OPTIONS_PATH=""
-          if [ -f "frontend/ios/App/export_options.plist" ]; then
-            EXPORT_OPTIONS_PATH="frontend/ios/App/export_options.plist"
-            echo "✓ Encontrado em: frontend/ios/App/export_options.plist"
-          elif [ -f "ios/App/export_options.plist" ]; then
-            EXPORT_OPTIONS_PATH="ios/App/export_options.plist"
-            echo "✓ Encontrado em: ios/App/export_options.plist"
-          elif [ -f "./export_options.plist" ]; then
-            EXPORT_OPTIONS_PATH="./export_options.plist"
-            echo "✓ Encontrado em: ./export_options.plist"
-          else
-            echo "✗ ERRO: export_options.plist não encontrado!"
-            echo "Buscando todos os arquivos .plist..."
-            find . -name "*.plist" -type f 2>/dev/null | head -20 || true
-            exit 1
-          fi
-          
-          # Mostrar conteúdo do arquivo encontrado
-          echo "Conteúdo do arquivo encontrado:"
-          cat "$EXPORT_OPTIONS_PATH" || true
-          
-          # Criar diretório de destino se não existir
-          mkdir -p "$CM_BUILD_DIR"
+          # Criar diretório de destino
           mkdir -p "$CM_BUILD_DIR/build/ipa"
           
-          # Copiar para local acessível
-          cp "$EXPORT_OPTIONS_PATH" "$CM_BUILD_DIR/export_options.plist"
-          echo "Arquivo copiado para: $CM_BUILD_DIR/export_options.plist"
+          # CRIAR export_options.plist DIRETAMENTE no local onde será usado
+          cat > "$CM_BUILD_DIR/export_options.plist" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>development</string>
+    <key>teamID</key>
+    <string></string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>stripSwiftSymbols</key>
+    <true/>
+</dict>
+</plist>
+EOF
           
-          # Verificar se foi copiado
-          if [ ! -f "$CM_BUILD_DIR/export_options.plist" ]; then
-            echo "✗ ERRO: Falha ao copiar export_options.plist!"
-            ls -la "$CM_BUILD_DIR/" || true
-            exit 1
-          fi
-          
-          # Verificar conteúdo do arquivo copiado
-          echo "Conteúdo do arquivo copiado:"
-          cat "$CM_BUILD_DIR/export_options.plist" || true
+          echo "Arquivo export_options.plist criado em: $CM_BUILD_DIR/export_options.plist"
+          ls -la "$CM_BUILD_DIR/export_options.plist"
+          cat "$CM_BUILD_DIR/export_options.plist"
           
           # Verificar se o archive existe
           if [ ! -d "$CM_BUILD_DIR/build/App.xcarchive" ]; then
-            echo "✗ ERRO: Archive não encontrado em $CM_BUILD_DIR/build/App.xcarchive"
+            echo "ERRO: Archive não encontrado!"
             ls -la "$CM_BUILD_DIR/build/" || true
             exit 1
           fi
           
-          # Usar caminho absoluto no xcodebuild
-          EXPORT_PLIST_ABS="$CM_BUILD_DIR/export_options.plist"
-          echo "Usando arquivo: $EXPORT_PLIST_ABS"
-          echo "Verificando se arquivo existe antes de exportar..."
-          ls -la "$EXPORT_PLIST_ABS" || exit 1
+          # Exportar IPA usando caminho absoluto
+          EXPORT_PLIST="$CM_BUILD_DIR/export_options.plist"
+          echo "Exportando IPA com arquivo: $EXPORT_PLIST"
           
-          # Exportar IPA
           xcodebuild -exportArchive \
             -archivePath "$CM_BUILD_DIR/build/App.xcarchive" \
             -exportPath "$CM_BUILD_DIR/build/ipa" \
-            -exportOptionsPlist "$EXPORT_PLIST_ABS" \
-            -allowProvisioningUpdates
+            -exportOptionsPlist "$EXPORT_PLIST"
     artifacts:
       - build/ipa/*.ipa
     publishing:

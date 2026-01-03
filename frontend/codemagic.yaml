@@ -11,6 +11,7 @@ workflows:
         APP_ID: 69587605cd4ec8cbc103fc68
       node: 22
       xcode: latest
+      # NÃO usar cocoapods - projeto usa SPM
     scripts:
       - name: Install dependencies
         script: |
